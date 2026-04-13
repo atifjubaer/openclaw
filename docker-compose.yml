@@ -1,0 +1,17 @@
+services:
+  openclaw:
+    # Build from the Dockerfile in this directory
+    build: .
+    # Container name for easy 'docker exec' commands
+    container_name: openclaw-agent
+    ports:
+      # Gateway API port
+      - "18789:18789"
+      # Dashboard UI port
+      - "3000:3000"
+    volumes:
+      # Mount local claw-data folder to OpenClaw's config directory inside the container
+      # All config, agents, credentials, and logs are stored here on your machine
+      - ./claw-data:/root/.openclaw
+    # Auto-restart the container unless you manually stop it
+    restart: unless-stopped
