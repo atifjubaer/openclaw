@@ -3,15 +3,27 @@
 This guide covers everything you need to set up your own OpenClaw agent locally using Docker Desktop. **No manual file editing required** — the interactive onboard wizard handles all configuration.
 
 ## Prerequisites
-- [Docker Desktop](https://docs.docker.com/get-docker/) installed and running.
+- **Git** (to clone the repository).
+- **Docker** and **Docker Compose** installed ([Docker Desktop](https://docs.docker.com/get-docker/) is recommended as it includes both).
 
-That's it! The onboard wizard will walk you through getting API keys and tokens during setup.
+> 💡 **Fun Fact:** You do **NOT** need Node.js installed on your computer! Because we are using Docker, the entire Node.js environment runs safely isolated inside the container. 
 
 ---
 
-## 🚢 Step 1: Build & Start the Container
+## 📥 Step 1: Download the Project
 
-Open your terminal in this project's root directory and run:
+Open your terminal and clone the repository:
+
+```bash
+git clone https://github.com/atifjubaer/openclaw-setup.git
+cd openclaw-setup
+```
+
+---
+
+## 🚢 Step 2: Build & Start the Container
+
+Run the following command to build and start OpenClaw:
 
 ```bash
 docker compose up -d --build
@@ -26,7 +38,7 @@ The container will start the OpenClaw gateway in **unconfigured mode**, ready fo
 
 ---
 
-## ⚙️ Step 2: Run the Interactive Onboard Wizard
+## ⚙️ Step 3: Run the Interactive Onboard Wizard
 
 ```bash
 docker exec -it openclaw-agent openclaw onboard
@@ -54,7 +66,7 @@ docker compose restart
 
 ---
 
-## 🖥️ Step 3: Access the Dashboard
+## 🖥️ Step 4: Access the Dashboard
 
 **1. Get your auto-generated gateway token:**
 ```bash
@@ -78,7 +90,7 @@ docker exec openclaw-agent openclaw devices approve <DEVICE_ID>
 
 ---
 
-## 🤖 Step 4: Start Chatting!
+## 🤖 Step 5: Start Chatting!
 - Talk to the agent in the **Local Dashboard** at `http://127.0.0.1:3000`
 - Open **Telegram** and message your bot — the agent responds natively.
 

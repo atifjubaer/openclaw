@@ -1,0 +1,6 @@
+# Ignore the main data directory to protect API keys and configuration
+claw-data/
+
+# OS generated files
+.DS_Store
+Thumbs.db
