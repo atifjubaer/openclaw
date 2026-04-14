@@ -1,14 +1,14 @@
-# Use Node.js 24 LTS on Alpine Linux — lightweight base image (~50MB vs ~350MB for full)
+# Use Node.js 24 LTS on Alpine Linux — lightweight base image
 FROM node:24-alpine
 
-# Set working directory inside the container (doesn't affect host)
+# Set working directory inside the container
 WORKDIR /app
 
-# Install OpenClaw CLI globally so all 'openclaw' commands are available
+# Install OpenClaw CLI globally
 RUN npm install -g openclaw@latest
 
-# Declare ports: 18789 = Gateway API, 3000 = Dashboard UI
-EXPOSE 18789 3000
+# Declare port: 18789 is Gateway API & Dashboard UI
+EXPOSE 18789
 
 # On container start:
 # 1. Allow dashboard to work without strict origin checking (required for Docker networking)

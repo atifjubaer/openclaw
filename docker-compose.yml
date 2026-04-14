@@ -5,13 +5,11 @@ services:
     # Container name for easy 'docker exec' commands
     container_name: openclaw-agent
     ports:
-      # Gateway API port
+      # Gateway API & Dashboard UI port
       - "18789:18789"
-      # Dashboard UI port
-      - "3000:3000"
     volumes:
-      # Mount local claw-data folder to OpenClaw's config directory inside the container
-      # All config, agents, credentials, and logs are stored here on your machine
+      # Mount local claw-data folder to OpenClaw's root config directory inside the container
+      # This exposes your workspace, making it behave like the official cloned repository structure
       - ./claw-data:/root/.openclaw
     # Auto-restart the container unless you manually stop it
     restart: unless-stopped
