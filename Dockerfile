@@ -7,11 +7,12 @@ RUN apk add --no-cache git python3 make g++
 # Set working directory inside the container
 WORKDIR /app
 
-# Install OpenClaw CLI globally
+# Install OpenClaw CLI globally — always get the latest stable release
+# If a specific version has a bug, pin it temporarily: openclaw@2026.4.12
 RUN npm install -g openclaw@latest
 
-# Declare port: 18789 is Gateway API & Dashboard UI
-EXPOSE 18789
+# Expose the Gateway port (18789) and potential Dashboard port (3000)
+EXPOSE 18789 3000
 
 # On container start:
 # 1. Allow dashboard to work without strict origin checking (required for Docker networking)

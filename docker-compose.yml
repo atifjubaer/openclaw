@@ -7,6 +7,8 @@ services:
     ports:
       # Gateway API & Dashboard UI port
       - "18789:18789"
+      # Dashboard port
+      - "3000:3000"
     volumes:
       # Mount local claw-data folder to OpenClaw's root config directory inside the container
       # This exposes your workspace, making it behave like the official cloned repository structure

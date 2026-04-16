@@ -1,98 +1,211 @@
-# OpenClaw Dockerized Setup Guide 🦀
+# OpenClaw Docker Setup
 
-Welcome to the pure, manual, and completely perfect Docker installation for OpenClaw. This architecture gives you the extreme stability of an isolated Linux environment (using Node 22 LTS to perfectly support all native modules) while retaining 100% of the advanced skills, flows, and capabilities of a native installation.
+A clean, simple Docker installation for OpenClaw. Everything runs inside an isolated Linux container — no Node.js needed on your host.
+
+Works on **Windows, macOS, and Linux**.
 
 ---
 
-## 📥 1. Fresh Complete Installation
+## Step 1 — Prerequisites
 
-Because we are using Docker, you do not need Node.js installed on your host computer. Everything runs purely and securely in the background.
+Make sure Docker is installed and running.
 
 ```bash
-git clone https://github.com/atifjubaer/openclaw-setup.git
-cd openclaw-setup
-docker compose up -d --build
+docker --version
 ```
-> **What this does:** It pulls the highly stable Node 22 Alpine image, installs the necessary C++ build tools (`git`, `python3`, `g++`), and boots OpenClaw. Your configuration will be permanently saved in the local `claw-data/` folder.
+
+If that fails, install [Docker Desktop](https://docs.docker.com/get-docker/) and restart your terminal.
 
 ---
 
-## ⚙️ 2. The Core Wizard (Terminal Setup)
+## Step 2 — Install & Launch
 
-For a fresh install, OpenClaw needs identity and gateway credentials. We configure this via the secure terminal wizard.
+```bash
+git clone https://github.com/atifjubaer/openclaw.git
+cd openclaw
+docker compose up -d --build
+```
+
+Verify it's running:
+
+```bash
+docker ps
+```
+
+You should see `openclaw-agent` with status `Up`.
+
+---
+
+## Step 3 — Setup Wizard
 
 ```bash
 docker exec -it openclaw-agent openclaw onboard
 ```
 
-1. **Select Local Gateway:** Choose this machine.
-2. **AI Provider:** Pick your starting provider (e.g., Z.AI, OpenAI) and paste your API key.
-3. **Gateway Token:** Leave it blank to generate a highly secure token.
-4. **Channels:** Skip for now or add your basic Telegram bot token.
+The wizard will ask:
 
-**CRITICAL:** Once the wizard finishes, lock in your new configuration by rebooting the container:
+1. **Gateway** — Choose "This machine"
+2. **AI Provider** — Pick your provider and paste your API key
+3. **Gateway Token** — Press Enter to auto-generate
+4. **Channels** — Skip for now, or add a Telegram bot token
+
+After the wizard, restart to lock in your config:
+
 ```bash
 docker compose restart
 ```
 
 ---
 
-## 🔐 3. Accessing the Web Dashboard (Bypassing Errors)
+## Step 4 — Open the Dashboard
 
-If you simply visit `http://localhost:18789`, you will get an `unauthorized` error because OpenClaw heavily protects your control interface. 
+### Get your token
 
-### Step 3A: Get Your Secure URL
-Run this command to securely retrieve your gateway token:
 ```bash
 docker exec openclaw-agent openclaw config get gateway.auth.token
 ```
-*(If the console says `__OPENCLAW_REDACTED__`, simply open the `claw-data/openclaw.json` file in VS Code or Notepad on your computer and copy the `token` string manually!)*
 
-Append that token to your URL like this:
-> `http://127.0.0.1:18789/#token=YOUR_TOKEN_HERE`
+If the output shows `__OPENCLAW_REDACTED__`, open the config file instead:
 
-### Step 3B: Magic Auto-Approve (Device Pairing)
-Opening the URL will present a "Pairing Required" block. To instantly approve your browser without messing with manual copy-pasting, run this Magic Auto-Approve command in your terminal:
+- **Windows:** `notepad claw-data\openclaw.json`
+- **macOS/Linux:** `cat claw-data/openclaw.json`
 
-```bash
-docker exec openclaw-agent /bin/sh -c "openclaw devices list | grep -i pending | grep -oE '[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}' | xargs -I {} openclaw devices approve {}"
+Copy the `"token"` value.
+
+### Open the dashboard
+
 ```
-**Hard-refresh your browser (F5), and you are inside the Dashboard!**
-
----
-
-## 📦 4. Installing Modules & Smooth Configuration
-
-In the past, manually editing JSON files to add multiple modules caused syntax errors that broke the installation. **Never edit the JSON file manually if you don't have to!** 
-
-Your new installation is 100% capable of doing everything your old OpenClaw setup did. The **smoothest, perfect, error-free way** to add multiple modules, providers, or channels is through the glowing **Control UI Dashboard**.
-
-1. **Modules & Skills:** Go to the UI, find the Modules/Skills tab, and you can instantly add back all your favorite plugins! OpenClaw will handle all the complex folder generation inside your `claw-data/` folder automatically.
-2. **Multiple Providers:** Click the **Settings/Config** gear icon in the UI. You can visually add as many AI providers and Telegram tokens as you want. The UI mathematically guarantees you won't get a formatting error that breaks your setup!
-
----
-
-## 📱 5. Telegram Setup & Pairing
-
-If you set up a Telegram Bot, OpenClaw blocks strangers by default. When you message your bot for the first time, it will reply with a security warning and a pairing code.
-
-> `Your Telegram user id: 123456789`
-> `Pairing code: ABCD1234`
-
-To permanently authorize your account, take that code and run:
-```bash
-docker exec openclaw-agent openclaw pairing approve telegram <PASTE_CODE_HERE>
+http://127.0.0.1:18789/#token=YOUR_TOKEN_HERE
 ```
 
+An alternative dashboard is also available on port 3000:
+
+```
+http://127.0.0.1:3000
+```
+
+### Approve your browser (first time only)
+
+The dashboard will show a "Pairing Required" screen. Get your device ID:
+
+```bash
+docker exec openclaw-agent openclaw devices list
+```
+
+Then approve it:
+
+```bash
+docker exec openclaw-agent openclaw devices approve DEVICE_ID
+```
+
+Hard-refresh your browser (`Ctrl+Shift+R` / `Cmd+Shift+R`) — you're in.
+
 ---
 
-## ❓ 6. Troubleshooting & FAQs
+## Step 5 — Add Modules & Providers
 
-**1. "Update Available" banner in UI?**
-We baked all the necessary compilation tools (`git`, `make`, `python3`) directly into the `node:22-alpine` environment. This means if you click **"Update Now"** inside the UI, it will successfully download and compile OpenClaw without failing! 
+Use the **Dashboard UI** to add modules, providers, and channels. Do **not** edit `claw-data/openclaw.json` manually — a single syntax error will break your installation.
 
-**2. Why does the AI erase my files if I ask it to configure itself?**
-If you tell your AI Assistant to edit `D:\Ai\.openclaw\openclaw.json` or `F:\openclaw`, it will fail or erase data. The AI is trapped inside the Linux Docker Container. To the AI, your files are strictly located at `/root/.openclaw/openclaw.json`. 
+1. **Modules & Skills** — Modules/Skills tab in the UI. OpenClaw handles folder creation automatically.
+2. **Multiple Providers** — Click the Settings/Config gear icon to add AI providers and API keys.
+3. **Telegram Channels** — Add bot tokens through the UI's channel settings.
 
-**3. Migrating to VPS?**
-Just zip your entire folder (especially `claw-data/`) and move it to your VPS. Run `docker compose up -d` and it will instantly boot with all your configurations flawlessly intact!
+---
+
+## Step 6 — Telegram Pairing (Optional)
+
+If you added a Telegram bot, message it and it will reply with a pairing code:
+
+```
+Your Telegram user id: 123456789
+Pairing code: ABCD1234
+```
+
+Approve your account:
+
+```bash
+docker exec openclaw-agent openclaw pairing approve telegram ABCD1234
+```
+
+---
+
+## Important — AI Self-Configuration Warning
+
+**Never ask your OpenClaw AI assistant to edit its own configuration.** The AI runs inside the Docker container and may corrupt or erase its own config if asked to modify it.
+
+The file paths:
+- Your host machine: `claw-data/openclaw.json`
+- Inside the container: `/root/.openclaw/openclaw.json`
+
+These are the **same file** (mounted via Docker volume).
+
+**If the AI breaks your config**, re-run the wizard:
+
+```bash
+docker exec -it openclaw-agent openclaw onboard
+docker compose restart
+```
+
+---
+
+## Ports
+
+| Port | Purpose |
+|------|---------|
+| 18789 | Gateway API & Dashboard UI |
+| 3000 | Alternative Dashboard UI |
+
+Both ports are exposed in the Dockerfile and mapped in `docker-compose.yml`. To change a port, edit `docker-compose.yml` (e.g. `"19000:18789"` to use port 19000 instead).
+
+---
+
+## Common Issues
+
+**"unauthorized" when visiting localhost:18789**
+You need the token in the URL. See [Step 4](#step-4--open-the-dashboard).
+
+**Container keeps restarting**
+```bash
+docker compose logs --tail 50
+```
+Likely a corrupted `openclaw.json`. Delete it and re-run the wizard:
+```bash
+rm claw-data/openclaw.json
+docker exec -it openclaw-agent openclaw onboard
+docker compose restart
+```
+
+**Port already in use**
+Edit `docker-compose.yml` to use a different port (e.g. `"19000:18789"`).
+
+**"Update Available" banner in the UI**
+Safe to click. The Dockerfile includes all build tools (`git`, `python3`, `make`, `g++`) so in-UI updates compile successfully.
+
+**Want a specific OpenClaw version?**
+Edit the Dockerfile and change `openclaw@latest` to a pinned version (e.g. `openclaw@2026.4.12`), then rebuild:
+```bash
+docker compose up -d --build
+```
+
+---
+
+## Migrating to a VPS
+
+Copy the entire project folder (especially `claw-data/`) to your VPS, then:
+
+```bash
+docker compose up -d
+```
+
+All your configuration, providers, and channels will be intact.
+
+---
+
+## Uninstall
+
+```bash
+docker compose down
+docker rmi openclaw-openclaw
+```
+
+Your data in `claw-data/` stays on disk. Delete the entire project folder to remove it completely.
