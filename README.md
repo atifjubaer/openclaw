@@ -86,16 +86,18 @@ http://127.0.0.1:3000
 
 ### Approve your browser (first time only)
 
-The dashboard will show a "Pairing Required" screen. Get your device ID:
+The dashboard will show a "Pairing Required" screen. 
+Get your pending request ID:
 
 ```bash
 docker exec openclaw-agent openclaw devices list
 ```
 
+Look under the **Pending** table and copy the **Request ID** (it looks like `7ea70a95-...`), NOT the Device ID.
 Then approve it:
 
 ```bash
-docker exec openclaw-agent openclaw devices approve DEVICE_ID
+docker exec openclaw-agent openclaw devices approve REQUEST_ID
 ```
 
 Hard-refresh your browser (`Ctrl+Shift+R` / `Cmd+Shift+R`) — you're in.
@@ -112,7 +114,36 @@ Use the **Dashboard UI** to add modules, providers, and channels. Do **not** edi
 
 ---
 
-## Step 6 — Telegram Pairing (Optional)
+## Step 6 — Pinning a Default Model & Fallbacks
+
+If you configure a provider like **OpenRouter**, the dashboard will fetch and display *hundreds* of models automatically. To avoid picking a model every time, you can pin a specific model and set up fallbacks (in case the primary model goes down).
+
+Run the interactive configuration wizard:
+
+```bash
+docker exec -it openclaw-agent openclaw configure
+```
+1. Select **Agent Defaults** or **Profiles**.
+2. Enter your exact model ID when prompted for the default model (e.g., `openrouter/anthropic/claude-3.5-sonnet`).
+3. You can also specify **Fallback Models** to switch to automatically if your main model fails.
+
+**Or set it directly via command line:**
+```bash
+# Set your primary model
+docker exec openclaw-agent openclaw config set agents.defaults.model "openrouter/anthropic/claude-3.5-sonnet"
+
+# Set your fallback models
+docker exec openclaw-agent openclaw config set agents.defaults.fallbacks '["openai/gpt-4o", "google/gemini-1.5-pro"]'
+```
+
+**IMPORTANT**: Remember to restart the container after running these commands!
+```bash
+docker compose restart
+```
+
+---
+
+## Step 7 — Telegram Pairing (Optional)
 
 If you added a Telegram bot, message it and it will reply with a pairing code:
 
@@ -138,6 +169,18 @@ The file paths:
 - Inside the container: `/root/.openclaw/openclaw.json`
 
 These are the **same file** (mounted via Docker volume).
+
+**Why is my openclaw.json empty?**
+In newer versions of OpenClaw, `openclaw.json` handles only Gateway settings (like tokens and ports). AI Provider Configurations (API keys) are securely stored in a separate file:
+- `claw-data/agents/main/agent/auth-profiles.json`
+This is why `openclaw.json` looks empty when you add a provider!
+
+**IMPORTANT: Restarting is Required!**
+Every time you use the CLI (like `openclaw onboard`, `configure`, or `pairing approve`), you **MUST restart the container** for the running agent to reload its settings from those files. Otherwise, the AI will say "No API key found".
+
+```bash
+docker compose restart
+```
 
 **If the AI breaks your config**, re-run the wizard:
 

@@ -1,8 +1,8 @@
-# Use Node.js 22 LTS on Alpine Linux — lightweight and highly stable base image
-FROM node:22-alpine
+# Use Node.js 24 LTS on Alpine Linux — lightweight and highly stable base image (Official OpenClaw recommends Node 24)
+FROM node:24-alpine
 
-# Install git and build tools required for OpenClaw's internal dashboard update button to work smoothly!
-RUN apk add --no-cache git python3 make g++
+# Install git, curl, and build tools required for OpenClaw's internal dashboard update button to work smoothly!
+RUN apk add --no-cache git curl python3 make g++
 
 # Set working directory inside the container
 WORKDIR /app

@@ -9,9 +9,16 @@ services:
       - "18789:18789"
       # Dashboard port
       - "3000:3000"
+    environment:
+      # Sets terminal colors correctly for CLI and sets Timezone for AI tasks
+      - TERM=xterm-256color
+      - TZ=UTC
+    # Ensures Node.js processes handle startup/shutdown signals correctly (Zombie process prevention)
+    init: true
     volumes:
       # Mount local claw-data folder to OpenClaw's root config directory inside the container
       # This exposes your workspace, making it behave like the official cloned repository structure
       - ./claw-data:/root/.openclaw
     # Auto-restart the container unless you manually stop it
     restart: unless-stopped
+
