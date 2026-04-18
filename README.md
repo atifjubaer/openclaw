@@ -84,23 +84,24 @@ An alternative dashboard is also available on port 3000:
 http://127.0.0.1:3000
 ```
 
-### Approve your browser (first time only)
+### Fixing "Pairing Required"
 
-The dashboard will show a "Pairing Required" screen. 
-Get your pending request ID:
+Because OpenClaw enforces strict device security on the dashboard, the first time you visit the URL from a new browser, you will likely see a pairing required error.
 
-```bash
-docker exec openclaw-agent openclaw devices list
-```
+To authorize your browser:
 
-Look under the **Pending** table and copy the **Request ID** (it looks like `7ea70a95-...`), NOT the Device ID.
-Then approve it:
-
-```bash
-docker exec openclaw-agent openclaw devices approve REQUEST_ID
-```
-
-Hard-refresh your browser (`Ctrl+Shift+R` / `Cmd+Shift+R`) — you're in.
+1. Keep the dashboard open in your browser.
+2. Run the following command in your terminal to list pending connections:
+   ```bash
+   docker exec openclaw-agent openclaw devices list
+   ```
+3. Look for the pending request ID (e.g., `40c4e10d-eb96-4eea...`) under the "Pending" list.
+4. Approve the connection by running:
+   ```bash
+   docker exec openclaw-agent openclaw devices approve <PENDING_REQUEST_ID>
+   ```
+   *(e.g. `docker exec openclaw-agent openclaw devices approve 89c2f148-0cb9-4fca`)*
+5. Hard refresh (`Cmd+Shift+R` or `Ctrl+F5`) the dashboard page in your browser. You will immediately be granted access to the web chat.
 
 ---
 
@@ -143,20 +144,20 @@ docker compose restart
 
 ---
 
-## Step 7 — Telegram Pairing (Optional)
+## Step 7 — Telegram Configuration (Optional)
 
-If you added a Telegram bot, message it and it will reply with a pairing code:
+By default, OpenClaw enforces strict **DM Pairing** for messaging channels. This means if someone messages your Telegram bot, it will ignore their prompt and reply with a pairing code that must be manually approved via CLI.
 
-```
-Your Telegram user id: 123456789
-Pairing code: ABCD1234
-```
+If you want your bot to be public or just want it to immediately talk to anyone (giving it "superior permissions"), you must open the policy and allow all senders.
 
-Approve your account:
-
+Run these two commands:
 ```bash
-docker exec openclaw-agent openclaw pairing approve telegram ABCD1234
+docker exec openclaw-agent openclaw config set channels.telegram.dmPolicy "open"
+docker exec openclaw-agent openclaw config set channels.telegram.allowFrom '["*"]'
+docker compose restart
 ```
+
+*(Alternatively, if you want to keep strict mode on and only authorize yourself, message the bot to receive your Pairing Code, then run `docker exec openclaw-agent openclaw pairing approve telegram YOUR_CODE_HERE`)*
 
 ---
 
@@ -203,6 +204,20 @@ Both ports are exposed in the Dockerfile and mapped in `docker-compose.yml`. To 
 ---
 
 ## Common Issues
+
+### 🚀 How to run the doctor --fix command
+
+Once you have saved your configuration files or if the system states an environment error, run these commands in your PowerShell terminal to repair the environment and start the server:
+
+**Run the Doctor:**
+```powershell
+docker exec -it openclaw-agent openclaw doctor --fix
+```
+
+**Restart the Container:**
+```powershell
+docker compose restart
+```
 
 **"unauthorized" when visiting localhost:18789**
 You need the token in the URL. See [Step 4](#step-4--open-the-dashboard).
